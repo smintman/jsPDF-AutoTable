@@ -125,7 +125,10 @@ function fitContent(table) {
             }
             else if (cell.styles.overflow === 'linebreakWithNewLine')
             {
+               
                 cell.text = Array.isArray(cell.text) ? cell.text.join('\n') : cell.text;
+                let brRegex = /<br\/>/gm;
+                cell.text = cell.text.replace(brRegex,'\n');
                 // Add one pt to textSpace to fix rounding error
                 cell.text = state().doc.splitTextToSize(cell.text, textSpace + 1 / (state().scaleFactor() || 1), {fontSize: cell.styles.fontSize});
             }
