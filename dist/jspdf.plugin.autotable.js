@@ -728,6 +728,7 @@ jsPDF.API.autoTable = function () {
 };
 // Assign false to enable `doc.previousAutoTable.finalY || 40` sugar;
 jsPDF.API.previousAutoTable = false;
+jsPDF.API.autoTable.previous = false; // @deprecated
 jsPDF.API.autoTableSetDefaults = function (defaults) {
     state_1.setDefaults(defaults, this);
     return this;
@@ -736,10 +737,8 @@ jsPDF.autoTableSetDefaults = function (defaults, doc) {
     state_1.setDefaults(defaults, doc);
     return this;
 };
-// @deprecated
-jsPDF.API.autoTable.previous = false;
 /**
- * @Deprecated. Use html option instead
+ * @Deprecated. Use html option instead doc.autoTable(html: '#table')
  */
 jsPDF.API.autoTableHtmlToJson = function (tableElem, includeHiddenElements) {
     console.error("Use of deprecated function: autoTableHtmlToJson. Use html option instead.");
@@ -794,7 +793,7 @@ jsPDF.API.autoTableEndPosY = function () {
  * @deprecated
  */
 jsPDF.API.autoTableAddPageContent = function (hook) {
-    console.error("Use of deprecated function: autoTableAddPageContent. Use jsPDF.autoTableSetDefaults({addPageContent: function() {}}) instead.");
+    console.error("Use of deprecated function: autoTableAddPageContent. Use jsPDF.autoTableSetDefaults({didDrawPage: () => {}}) instead.");
     if (!jsPDF.API.autoTable.globalDefaults) {
         jsPDF.API.autoTable.globalDefaults = {};
     }
@@ -805,8 +804,8 @@ jsPDF.API.autoTableAddPageContent = function (hook) {
  * @deprecated
  */
 jsPDF.API.autoTableAddPage = function () {
-    console.error("Use of deprecated function: autoTableAddPage. Use event.addPage() in eventHandler instead.");
-    tableDrawer_1.addPage();
+    console.error("Use of deprecated function: autoTableAddPage. Use doc.addPage()");
+    this.addPage();
     return this;
 };
 
@@ -939,6 +938,11 @@ function fitContent(table) {
             var textSpace = cell.width - cell.padding('horizontal');
             if (cell.styles.overflow === 'linebreak') {
                 cell.text = Array.isArray(cell.text) ? cell.text.join(' ') : cell.text;
+                // Add one pt to textSpace to fix rounding error
+                cell.text = state_1["default"]().doc.splitTextToSize(cell.text, textSpace + 1 / (state_1["default"]().scaleFactor() || 1), { fontSize: cell.styles.fontSize });
+            }
+            else if (cell.styles.overflow === 'linebreakWithNewLine') {
+                cell.text = Array.isArray(cell.text) ? cell.text.join('\n') : cell.text;
                 // Add one pt to textSpace to fix rounding error
                 cell.text = state_1["default"]().doc.splitTextToSize(cell.text, textSpace + 1 / (state_1["default"]().scaleFactor() || 1), { fontSize: cell.styles.fontSize });
             }
@@ -1291,6 +1295,9 @@ var Row = /** @class */ (function () {
         this.pageCount = 1;
         this.spansMultiplePages = false;
         this.raw = raw;
+        if (raw._element) {
+            this.raw = raw._element;
+        }
         this.index = index;
         this.section = section;
     }
@@ -1305,7 +1312,6 @@ var Cell = /** @class */ (function () {
         this.textPos = {};
         this.height = 0;
         this.width = 0;
-        this.raw = raw;
         this.rowSpan = raw && raw.rowSpan || 1;
         this.colSpan = raw && raw.colSpan || 1;
         this.styles = assign(themeStyles, raw && raw.styles || {});
@@ -1313,7 +1319,9 @@ var Cell = /** @class */ (function () {
         var text = '';
         var content = raw && typeof raw.content !== 'undefined' ? raw.content : raw;
         content = content != undefined && content.dataKey != undefined ? content.title : content;
-        if (content && typeof window === 'object' && window.HTMLElement && content instanceof window.HTMLElement) {
+        var fromHtml = typeof window === 'object' && window.HTMLElement && content instanceof window.HTMLElement;
+        this.raw = fromHtml ? content : raw;
+        if (content && fromHtml) {
             text = (content.innerText || '').trim();
         }
         else {
@@ -1568,6 +1576,7 @@ function parseTableSection(window, sectionElement, includeHidden, useCss) {
             }
         }
         if (resultRow.length > 0 && (includeHidden || rowStyles.display !== 'none')) {
+            resultRow._element = row;
             results.push(resultRow);
         }
     }

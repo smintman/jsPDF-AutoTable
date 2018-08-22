@@ -122,7 +122,14 @@ function fitContent(table) {
                 cell.text = Array.isArray(cell.text) ? cell.text.join(' ') : cell.text;
                 // Add one pt to textSpace to fix rounding error
                 cell.text = state().doc.splitTextToSize(cell.text, textSpace + 1 / (state().scaleFactor() || 1), {fontSize: cell.styles.fontSize});
-            } else if (cell.styles.overflow === 'ellipsize') {
+            }
+            else if (cell.styles.overflow === 'linebreakWithNewLine')
+            {
+                cell.text = Array.isArray(cell.text) ? cell.text.join('\n') : cell.text;
+                // Add one pt to textSpace to fix rounding error
+                cell.text = state().doc.splitTextToSize(cell.text, textSpace + 1 / (state().scaleFactor() || 1), {fontSize: cell.styles.fontSize});
+            }
+             else if (cell.styles.overflow === 'ellipsize') {
                 cell.text = ellipsize(cell.text, textSpace, cell.styles);
             } else if (cell.styles.overflow === 'hidden') {
                 cell.text = ellipsize(cell.text, textSpace, cell.styles, '');

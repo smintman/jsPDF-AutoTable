@@ -69,7 +69,7 @@ type MarginPadding = number | { top?: number, right?: number, bottom?: number, l
 interface Styles {
     font?: 'helvetica' | 'times' | 'courier',
     fontStyle?: 'normal' | 'bold' | 'italic' | 'bolditalic',
-    overflow?: 'linebreak' | 'ellipsize' | 'visible' | 'hidden',
+    overflow?: 'linebreak' | 'ellipsize' | 'visible' | 'hidden' | 'linebreakWithNewLine',
     fillColor?: Color,
     textColor?: Color,
     halign?: 'left' | 'center' | 'right',
