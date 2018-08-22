@@ -32,7 +32,7 @@ function parseTableSection(window, sectionElement, includeHidden, useCss) {
     }
     for (let i = 0; i < sectionElement.rows.length; i++) {
         let row = sectionElement.rows[i];
-        let resultRow: any = [];
+        let resultRow = [];
         let rowStyles = useCss ? parseCss(row, state().scaleFactor(), ['cellPadding', 'lineWidth', 'lineColor']) : {};
         for (let i = 0; i < row.cells.length; i++) {
             let cell = row.cells[i];
@@ -48,7 +48,6 @@ function parseTableSection(window, sectionElement, includeHidden, useCss) {
             }
         }
         if (resultRow.length > 0 && (includeHidden || rowStyles.display !== 'none')) {
-            resultRow._element = row;
             results.push(resultRow);
         }
     }

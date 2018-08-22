@@ -728,7 +728,6 @@ jsPDF.API.autoTable = function () {
 };
 // Assign false to enable `doc.previousAutoTable.finalY || 40` sugar;
 jsPDF.API.previousAutoTable = false;
-jsPDF.API.autoTable.previous = false; // @deprecated
 jsPDF.API.autoTableSetDefaults = function (defaults) {
     state_1.setDefaults(defaults, this);
     return this;
@@ -737,8 +736,10 @@ jsPDF.autoTableSetDefaults = function (defaults, doc) {
     state_1.setDefaults(defaults, doc);
     return this;
 };
+// @deprecated
+jsPDF.API.autoTable.previous = false;
 /**
- * @Deprecated. Use html option instead doc.autoTable(html: '#table')
+ * @Deprecated. Use html option instead
  */
 jsPDF.API.autoTableHtmlToJson = function (tableElem, includeHiddenElements) {
     console.error("Use of deprecated function: autoTableHtmlToJson. Use html option instead.");
@@ -793,7 +794,7 @@ jsPDF.API.autoTableEndPosY = function () {
  * @deprecated
  */
 jsPDF.API.autoTableAddPageContent = function (hook) {
-    console.error("Use of deprecated function: autoTableAddPageContent. Use jsPDF.autoTableSetDefaults({didDrawPage: () => {}}) instead.");
+    console.error("Use of deprecated function: autoTableAddPageContent. Use jsPDF.autoTableSetDefaults({addPageContent: function() {}}) instead.");
     if (!jsPDF.API.autoTable.globalDefaults) {
         jsPDF.API.autoTable.globalDefaults = {};
     }
@@ -804,8 +805,8 @@ jsPDF.API.autoTableAddPageContent = function (hook) {
  * @deprecated
  */
 jsPDF.API.autoTableAddPage = function () {
-    console.error("Use of deprecated function: autoTableAddPage. Use doc.addPage()");
-    this.addPage();
+    console.error("Use of deprecated function: autoTableAddPage. Use event.addPage() in eventHandler instead.");
+    tableDrawer_1.addPage();
     return this;
 };
 
@@ -1295,9 +1296,6 @@ var Row = /** @class */ (function () {
         this.pageCount = 1;
         this.spansMultiplePages = false;
         this.raw = raw;
-        if (raw._element) {
-            this.raw = raw._element;
-        }
         this.index = index;
         this.section = section;
     }
@@ -1312,6 +1310,7 @@ var Cell = /** @class */ (function () {
         this.textPos = {};
         this.height = 0;
         this.width = 0;
+        this.raw = raw;
         this.rowSpan = raw && raw.rowSpan || 1;
         this.colSpan = raw && raw.colSpan || 1;
         this.styles = assign(themeStyles, raw && raw.styles || {});
@@ -1319,16 +1318,14 @@ var Cell = /** @class */ (function () {
         var text = '';
         var content = raw && typeof raw.content !== 'undefined' ? raw.content : raw;
         content = content != undefined && content.dataKey != undefined ? content.title : content;
-        var fromHtml = typeof window === 'object' && window.HTMLElement && content instanceof window.HTMLElement;
-        this.raw = fromHtml ? content : raw;
-        if (content && fromHtml) {
+        if (content && typeof window === 'object' && window.HTMLElement && content instanceof window.HTMLElement) {
             text = (content.innerText || '').trim();
         }
         else {
             // Stringify 0 and false, but not undefined or null
             text = content != undefined ? '' + content : '';
         }
-        var splitRegex = /\r\n|\r|\n/g;
+        var splitRegex = /\\r\\n|\\r|\\n/g;
         this.text = text.split(splitRegex);
         this.contentWidth = this.padding('horizontal') + common_1.getStringWidth(this.text, this.styles);
         if (typeof this.styles.cellWidth === 'number') {
@@ -1576,7 +1573,6 @@ function parseTableSection(window, sectionElement, includeHidden, useCss) {
             }
         }
         if (resultRow.length > 0 && (includeHidden || rowStyles.display !== 'none')) {
-            resultRow._element = row;
             results.push(resultRow);
         }
     }
@@ -1782,7 +1778,7 @@ jsPDF.API.autoTableText = function (text, x, y, styles) {
     }
     var k = this.internal.scaleFactor;
     var fontSize = this.internal.getFontSize() / k;
-    var splitRegex = /\\r\\n|\\r|\\n/g;
+    var splitRegex = /\r\n|\r|\n/g;
     var splitText = null;
     var lineCount = 1;
     if (styles.valign === 'middle' || styles.valign === 'bottom' || styles.halign === 'center' || styles.halign === 'right') {

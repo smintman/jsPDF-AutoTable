@@ -14,7 +14,7 @@ jsPDF.API.autoTableText = function(text, x, y, styles) {
     let k = this.internal.scaleFactor;
     let fontSize = this.internal.getFontSize() / k;
 
-    let splitRegex = /\\r\\n|\\r|\\n/g;
+    let splitRegex = /\r\n|\r|\n/g;
     let splitText = null;
     let lineCount = 1;
     if (styles.valign === 'middle' || styles.valign === 'bottom' || styles.halign === 'center' || styles.halign === 'right') {
