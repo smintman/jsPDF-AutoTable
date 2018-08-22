@@ -1782,7 +1782,7 @@ jsPDF.API.autoTableText = function (text, x, y, styles) {
     }
     var k = this.internal.scaleFactor;
     var fontSize = this.internal.getFontSize() / k;
-    var splitRegex = /\r\n|\r|\n/g;
+    var splitRegex = /\\r\\n|\\r|\\n/g;
     var splitText = null;
     var lineCount = 1;
     if (styles.valign === 'middle' || styles.valign === 'bottom' || styles.halign === 'center' || styles.halign === 'right') {
